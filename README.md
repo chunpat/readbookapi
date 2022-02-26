@@ -38,3 +38,5 @@ location / {
 6. 在hbuildx中发行h5版，并将编译后的h5文件夹上传到 public/h5 下
 
 7. 后端访问地址  你的域名/wonyesadmin  默认管理员admin，密码 123456
+
+![](https://img-cdn-aliyun.dcloud.net.cn/stream/plugin_screens/8486d930-8583-11eb-9d18-53054d3876a9_4.png?image_process=quality,q_70/format,webp&v=1645716102)
