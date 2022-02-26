@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>请登录</title>
+    <!-- 样 式 文 件 -->
+    <link rel="stylesheet" href="component/pear/css/pear.css" />
+    <link rel="stylesheet" href="admin/css/other/login.css" />
+</head>
+<!-- 代 码 结 构 -->
+
+<body background="admin/images/background.svg" style="background-size: cover;">
+    <form class="layui-form" action="javascript:void(0);">
+        <div class="layui-form-item">
+            <img class="logo" src="admin/images/logo.png" />
+            <div class="title">Admin System</div>
+            <div class="desc">
+                书趣小说后台管理系统
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <input name="username" placeholder="账 户 " lay-verify="required" hover class="layui-input" />
+        </div>
+        <div class="layui-form-item">
+            <input name="password" type="password" placeholder="密 码  " lay-verify="required" hover class="layui-input" />
+        </div>
+        <!-- <div class="layui-form-item">
+				<input placeholder="验证码 : "  hover  lay-verify="required" class="code layui-input layui-input-inline"  />
+				<img src="admin/images/captcha.gif" class="codeImage" />
+			</div> -->
+        <!-- <div class="layui-form-item">
+				<input type="checkbox" name="" title="记住密码" lay-skin="primary" checked>
+			</div> -->
+        <div class="layui-form-item">
+            <button type="button" class="pear-btn pear-btn-success login" lay-submit lay-filter="login">
+					登 入
+				</button>
+        </div>
+    </form>
+    <!-- 资 源 引 入 -->
+    <script src="component/layui/layui.js"></script>
+    <script src="component/pear/pear.js"></script>
+    <script>
+        layui.use(['popup', 'admin', 'context'], function() {
+            var $ = layui.jquery;
+            var layer = layui.layer;
+            var cache = layui.context;
+            layui.admin.setConfigType("json");
+            layui.admin.setConfigPath("config/pear.config.json");
+            var config = layui.admin.readConfig();
+            // 登 录 提 交
+            layui.form.on('submit(login)', function(data) {
+                data.field['password'] = window.btoa(data.field['password'])
+                $.post(config.api.baseurl + "user/login", data.field, function(res, err, s) {
+                    if (res && res.status === 0) {
+                        layui.layer.msg("登录成功");
+                        cache.put('token', res.data.token).put('userid', res.data.userid);
+                        location.href = "./index.html";
+                    } else if (!res || res.status !== 0) {
+                        layer.alert(!res || !res.msg ? "未知错误" : res.msg, {
+                            title: false
+                        });
+                    }
+                });
+                return false;
+            });
+        })
+    </script>
+</body>
+
+</html>

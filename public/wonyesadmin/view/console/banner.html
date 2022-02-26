@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <link href="../../component/pear/css/pear.css" rel="stylesheet" />
+    <link href="../../admin/css/other/error.css" rel="stylesheet" />
+    <style>
+        .wrap {
+            padding: 15px
+        }
+        
+        h1 {
+            font-size: 16px;
+            margin: 15px auto;
+        }
+        
+        .layui-layer.layui-layer-iframe {
+            overflow: visible;
+        }
+        
+        img[onclick] {
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <h1 id="book_name"></h1>
+        <a class="layui-btn" href="javascript:;" onclick="openadd(this)">添加一张新轮播</a>
+        <table id="table" class="layui-table" lay-even lay-skin="line" lay-filter="table"></table>
+    </div>
+
+    <script type="text/html" id="rowbar">
+        <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="remove">删除</a>
+    </script>
+
+
+    <script type="text/html" id="img">
+        <img title="点击看大图" src="{{d.pic}}" style="width:180px" onclick="showimg('{{d.pic}}')">
+    </script>
+    <script src="../../component/layui/layui.js"></script>
+    <script src="../../component/pear/pear.js"></script>
+    <script>
+        var layer, tableln, addzjiframe;
+        layui.use(['table', 'admin', 'context', 'form'], function() {
+            var book_id = layui.url().search.book_id;
+            layer = layui.layer;
+            var table = layui.table;
+            var $ = layui.jquery;
+
+            layui.admin.setConfigType("json");
+            layui.admin.setConfigPath("../../config/pear.config.json");
+            var config = layui.admin.readConfig();
+            //第一个实例
+            tableln = table.render({
+                elem: '#table',
+                skin: 'line' //行边框风格
+                    ,
+                even: true,
+                url: config.api.baseurl + 'admin/bannerlist' //数据接口
+                    ,
+                page: false,
+                where: {
+                    token: layui.context.get('token'),
+                    userid: layui.context.get('userid'),
+                    book_id: book_id
+                },
+                cols: [
+                    [ //表头
+                        {
+                            field: 'id',
+                            title: 'ID',
+                            width: 80,
+                            sort: true
+                        }, {
+                            field: 'pic',
+                            title: '图片地址',
+                            width: 300,
+                            sort: true
+                        }, {
+                            field: "create_time",
+                            title: "预览",
+                            width: 200,
+                            templet: "#img"
+                        }, {
+                            field: 'url',
+                            title: '跳转地址/点击修改，可填写小说ID',
+                            width: 300,
+                            edit: true,
+                            sort: true
+                        }, {
+                            toolbar: '#rowbar',
+                            width: 150
+                        }
+                    ]
+                ],
+                parseData: function(res) {
+                    if (!res || !res.data) {
+                        return {
+                            "code": res.status, //解析接口状态
+                            "msg": res.msg, //解析提示文本
+                            "count": 0, //解析数据长度
+                            "data": null //解析数据列表
+                        };
+                    }
+                    return {
+                        "code": res.status, //解析接口状态
+                        "msg": res.msg, //解析提示文本
+                        "count": res.data.count, //解析数据长度
+                        "data": res.data.list //解析数据列表
+                    };
+                }
+            });
+
+            table.on('edit(table)', function(obj) {
+                if (obj.field == 'url') {
+                    if (!obj.value) {
+                        layer.alert('必须填写新的跳转地址', {
+                            title: false
+                        })
+                        return
+                    }
+                    layer.load();
+                    $.post(config.api.baseurl + "admin/editbanner", {
+                        token: layui.context.get('token'),
+                        userid: layui.context.get('userid'),
+                        id: obj.data.id,
+                        url: obj.value
+                    }, function(res) {
+                        layer.closeAll();
+                        if (!res || res.status !== 0) {
+                            layui.error(res);
+                            return
+                        }
+                        layer.msg("修改成功");
+                        obj.update();
+                        // tableln.reload();
+                    });
+                }
+            });
+
+            //删除 管理全部章节，添加新章节
+            table.on('tool(table)', function(obj) {
+                if (obj.event === 'remove') { //查看
+                    layer.confirm('真的删除该轮播项么', {
+                        title: false
+                    }, function(index) {
+                        layer.load();
+                        $.post(config.api.baseurl + "admin/removebanner", {
+                            token: layui.context.get('token'),
+                            userid: layui.context.get('userid'),
+                            id: obj.data.id
+                        }, function(res) {
+                            layer.closeAll();
+                            if (!res || res.status !== 0) {
+                                layui.error(res);
+                                return
+                            }
+                            obj.del();
+                        });
+                        //向服务端发送删除指令
+                    });
+                }
+            });
+        });
+
+        function openadd() {
+            layer.open({
+                type: 2,
+                content: "./addbanner.html",
+                title: false,
+                area: ['800px', '500px']
+            })
+        }
+
+        function showimg(src) {
+            layer.photos({
+                photos: {
+                    "start": 0, //初始显示的图片序号，默认0
+                    "data": [ //相册包含的图片，数组格式
+                        {
+                            "pid": 666, //图片id
+                            "src": src, //原图地址
+                        }
+                    ]
+                },
+                anim: 5 //0-6的选择，指定弹出图片动画类型，默认随机（请注意，3.0之前的版本用shift参数）
+            });
+
+        }
+    </script>
+</body>
+
+</html>

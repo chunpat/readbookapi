@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <link href="../../component/pear/css/pear.css" rel="stylesheet" />
+    <link href="../../admin/css/other/error.css" rel="stylesheet" />
+    <style>
+        [data-field="status"] .layui-table-cell,
+        [data-field="cid"] .layui-table-cell {
+            height: auto !important;
+            overflow: visible;
+        }
+        
+        .wrap {
+            padding: 15px
+        }
+        
+        .layui-layer.layui-layer-iframe {
+            overflow: visible;
+        }
+        
+        #searchtxt {
+            width: auto;
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <a class="layui-btn" href="javascript:;" onclick="openadd(this)">添加一本新书</a>
+        <input type="text" placeholder="搜索一下" class="layui-input" id="searchtxt"> <a class="layui-btn" href="javascript:;" onclick="searchfun(this)">搜索</a>
+        <table id="table" class="layui-table" lay-even lay-skin="line" lay-filter="table"></table>
+    </div>
+
+    <script type="text/html" id="rowbar">
+        <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="remove">删除</a>
+        <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="editzj">管理章节</a>
+    </script>
+    <script type="text/html" id="cate">
+        <select lay-filter="editcate" data-bookid="{{d.id}}" data-cid="{{d.cid}}">
+            {{# d.allcate.forEach(function(it){}}
+            <option value="{{it.id}}" {{# if (it.id===d.cid){ }} selected {{# } }} >{{it.name}}</option>
+            {{# }) }}
+        </select>
+    </script>
+
+    <script type="text/html" id="bookstatus">
+        <select lay-filter="editstat" data-bookid="{{d.id}}" data-status="{{d.status}}">
+            <option value="0" {{# if (d.status===0){ }} selected {{# } }} >连载中</option>
+            <option value="1" {{# if (d.status===1){ }} selected {{# } }}>已完结</option>
+        </select>
+    </script>
+
+    <div id="allcate" class="layui-hide">
+        <select class="layui-select"></select>
+    </div>
+    <script src="../../component/layui/layui.js"></script>
+    <script src="../../component/pear/pear.js"></script>
+    <script>
+        var config, layer, $, tableln;
+        layui.use(['table', 'admin', 'context', 'form'], function() {
+            var table = layui.table;
+            layer = layui.layer;
+            $ = layui.jquery;
+            layui.admin.setConfigType("json");
+            layui.admin.setConfigPath("../../config/pear.config.json");
+            config = layui.admin.readConfig();
+            //第一个实例
+            tableln = table.render({
+                elem: '#table',
+                skin: 'line' //行边框风格
+                    ,
+                even: true,
+                url: config.api.baseurl + 'admin/booklist' //数据接口
+                    ,
+                page: true //开启分页
+                    ,
+                where: {
+                    token: layui.context.get('token'),
+                    userid: layui.context.get('userid')
+                },
+                cols: [
+                    [ //表头
+                        {
+                            field: 'id',
+                            title: 'ID',
+                            width: 80,
+                            sort: true
+                        }, {
+                            field: 'name',
+                            title: '书名/单击修改',
+                            edit: true,
+                            width: 250
+                        }, {
+                            field: 'zjnums',
+                            title: '章节数量',
+                            width: 150,
+                            sort: true
+                        }, {
+                            field: 'length',
+                            title: '字数',
+                            width: 100,
+                            sort: true
+                        }, {
+                            field: 'status',
+                            title: "连载状态",
+                            templet: "#bookstatus"
+                        }, {
+                            field: 'cid',
+                            title: "所属分类",
+                            templet: "#cate"
+                        }, {
+                            toolbar: '#rowbar',
+                            width: 150
+                        }
+                    ]
+                ],
+                limit: 30,
+                parseData: function(res) {
+                    layui.context.put('allcate', res.data.allcate);
+                    for (var i = 0, len = res.data.list.length; i < len; i++) {
+                        res.data.list[i]['allcate'] = res.data.allcate;
+                    }
+                    return {
+                        "code": res.status, //解析接口状态
+                        "msg": res.msg, //解析提示文本
+                        "count": res.data.count, //解析数据长度
+                        "data": res.data.list //解析数据列表
+                    };
+                }
+            });
+            // 修改连载状态
+            layui.form.on('select(editstat)', function(data) {
+                console.log('data', data);
+                var bookid = $(data.elem).data('bookid');
+                var oldstatus = $(data.elem).data('status');
+                console.log("bookid=" + bookid + ",oldstatus=" + oldstatus);
+                if (oldstatus == data.value) {
+                    console.log("相等无需修改");
+                    return
+                }
+                layui.jquery.post(config.api.baseurl + "admin/editbook", {
+                    token: layui.context.get('token'),
+                    userid: layui.context.get('userid'),
+                    field: "status",
+                    value: data.value,
+                    bookid: bookid
+                }, function(res) {
+                    if (!res || res.status !== 0) {
+                        layui.error(res);
+                        return
+                    }
+                    layer.msg("修改成功");
+                });
+            });
+            // 修改分类
+            layui.form.on('select(editcate)', function(data) {
+                console.log('data', data);
+                var bookid = $(data.elem).data('bookid');
+                var oldcid = $(data.elem).data('cid');
+                console.log("bookid=" + bookid + ",oldcid=" + oldcid);
+                if (oldcid == data.value) {
+                    console.log("相等无需修改");
+                    return
+                }
+                layui.jquery.post(config.api.baseurl + "admin/editbook", {
+                    token: layui.context.get('token'),
+                    userid: layui.context.get('userid'),
+                    field: "cid",
+                    value: data.value,
+                    bookid: bookid
+                }, function(res) {
+                    if (!res || res.status !== 0) {
+                        layui.error(res);
+                        return
+                    }
+                    layer.msg("修改成功");
+                });
+            });
+
+            //删除 管理全部章节，添加新章节
+            table.on('tool(table)', function(obj) {
+                console.log(obj)
+                if (obj.event === 'remove') { //查看
+                    layer.confirm('真的删除此本书么', {
+                        title: false
+                    }, function(index) {
+                        layer.load();
+                        $.post(config.api.baseurl + "admin/removebook", {
+                            token: layui.context.get('token'),
+                            userid: layui.context.get('userid'),
+                            book_id: obj.data.id
+                        }, function(res) {
+                            layer.closeAll();
+                            if (!res || res.status !== 0) {
+                                layui.error(res);
+                                return
+                            }
+                            obj.del();
+                        });
+                    });
+                } else if (obj.event == 'editzj') {
+                    layer.open({
+                        type: 2,
+                        title: false,
+                        area: ['900px', '600px'],
+                        content: './zjlist.html?book_id=' + obj.data.id
+                    })
+                }
+            });
+            // 修改书名等
+            table.on('edit(table)', function(obj) {
+                if (obj.field == 'name') {
+                    if (!obj.value) {
+                        layer.alert('必须填写新的书名', {
+                            title: false
+                        })
+                        return
+                    }
+                    layer.load();
+                    $.post(config.api.baseurl + "admin/editbook", {
+                        token: layui.context.get('token'),
+                        userid: layui.context.get('userid'),
+                        field: 'name',
+                        bookid: obj.data.id,
+                        value: obj.value
+                    }, function(res) {
+                        layer.closeAll();
+                        if (!res || res.status !== 0) {
+                            layui.error(res);
+                            return
+                        }
+                        layer.msg("修改成功");
+                        obj.update();
+                        // tableln.reload();
+                    });
+                }
+            });
+        });
+
+        function openadd() {
+            layer.open({
+                type: 2,
+                content: "./addbook.html",
+                title: false,
+                area: ['800px', '500px']
+            })
+        }
+
+        function searchfun() {
+            var keyword = $("#searchtxt").val();
+            tableln.reload({
+                where: {
+                    keyword: keyword,
+                    token: layui.context.get('token'),
+                    userid: layui.context.get('userid')
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

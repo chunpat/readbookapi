@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <link href="../../component/pear/css/pear.css" rel="stylesheet" />
+    <link href="../../admin/css/other/error.css" rel="stylesheet" />
+    <style>
+        .wrap {
+            padding: 15px
+        }
+        
+        h1 {
+            margin: 15px auto;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <h1>添加一个新轮播</h1>
+        <hr class="layui-hr">
+        <form class="layui-form">
+            <div class="layui-form-item">
+                <label class="layui-form-label">跳转地址</label>
+                <div class="layui-input-block">
+                    <input type="text" name="url" required lay-verify="required" placeholder="url或者小说id" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">图片地址(填写或上传选一种)</label>
+                <div class="layui-input-block">
+                    <input type="text" name="src" placeholder="图片地址" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+
+            <div class="layui-form-item layui-form-text">
+                <label class="layui-form-label">
+                    <button type="button" class="layui-btn layui-btn-xs" id="uploadpic">
+                        <i class="layui-icon">&#xe67c;</i>上传封面图片
+                    </button>
+                </label>
+                <div class="layui-input-block" style="text-align:right">
+                    <img id="pic" alt="" style="width:150px;margin-right:0">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button class="layui-btn" lay-submit lay-filter="form">立即提交</button>
+                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <script src="../../component/layui/layui.js"></script>
+    <script src="../../component/pear/pear.js"></script>
+    <script>
+        layui.use(['admin', 'context', 'element', 'form', 'upload'], function() {
+            var $ = layui.jquery;
+            var layer = layui.layer;
+            layui.admin.setConfigPath("../../config/pear.config.json");
+            var config = layui.admin.readConfig();
+            var indexload;
+            layui.upload.render({
+                elem: '#uploadpic',
+                url: config.api.baseurl + 'admin/uploadpic' //必填项
+                    ,
+                method: '' //可选项。HTTP类型，默认post
+                    ,
+                field: "pic",
+                accept: "image",
+                choose: function() {
+                    indexload = layer.load();
+                },
+                data: {
+                    token: layui.context.get('token'),
+                    userid: layui.context.get('userid')
+                },
+                done: function(res) {
+                    layer.close(indexload);
+                    if (!res || res.status !== 0) {
+                        layui.error(res);
+                        return
+                    }
+
+                    $("#pic").attr('src', res.data.src);
+                }
+            });
+
+
+
+            layui.form.on('submit(form)', function(data) {
+                console.log(data);
+                var pic = $("#pic").attr('src');
+                data.field['userid'] = layui.context.get('userid');
+                data.field['token'] = layui.context.get('token');
+                if (!data.field['src'] && pic && /^http/.test(pic)) {
+                    data.field['src'] = pic;
+                }
+                if (!data.field['src']) {
+                    layer.alert('填写图片地址和上传图片，必须选择一种', {
+                        title: false
+                    })
+                    return false
+                }
+                var index = layer.load();
+
+                $.post(config.api.baseurl + "admin/addbanner",
+                    data.field,
+                    function(res) {
+                        layer.close(index);
+
+                        if (!res || res.status !== 0) {
+                            layui.error(res);
+                            return
+                        }
+                        parent.layui.layer.closeAll();
+                        parent.tableln.reload();
+
+                    }
+                );
+                return false;
+            });
+
+        });
+    </script>
+</body>
+
+</html>

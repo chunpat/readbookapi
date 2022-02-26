@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <link href="../../component/pear/css/pear.css" rel="stylesheet" />
+    <link href="../../admin/css/other/error.css" rel="stylesheet" />
+    <style>
+        .wrap {
+            padding: 15px
+        }
+        
+        h1 {
+            margin: 15px auto;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <h1>自动导入并生成小说</h1>
+        <hr class="layui-hr">
+        <div class="layui-row layui-col-space10">
+            <div class="layui-col-xs6 layui-col-md3">
+                <button type="button" class="layui-btn" id="uploadtxt">
+                        <i class="layui-icon">&#xe67c;</i>导入小说txt
+                    </button>
+            </div>
+            <div class="layui-col-xs6 layui-col-md9">
+                <div class="layui-text layui-font-18 layui-font-red">
+                    为保证精确拆分，txt必须符合下图格式,且文件名就是小说名(qmain采集软件可采集生成此种txt)</div>
+                <img src="../../static/daorutxt.png" style="width:100%">
+            </div>
+
+        </div>
+    </div>
+    <script src="../../component/layui/layui.js"></script>
+    <script src="../../component/pear/pear.js"></script>
+    <script>
+        layui.use(['admin', 'context', 'element', 'form', 'upload', 'popup'], function() {
+            var $ = layui.jquery;
+            var layer = layui.layer;
+            layui.admin.setConfigPath("../../config/pear.config.json");
+            var config = layui.admin.readConfig();
+            var index;
+            var num = 0;
+            layui.upload.render({
+                elem: '#uploadtxt',
+                auto: true,
+                accept: "file",
+                exts: "txt",
+                acceptMime: "text/plain",
+                multiple: true,
+                url: config.api.baseurl + 'admin/importtxt' //必填项
+                    ,
+                method: '' //可选项。HTTP类型，默认post
+                    ,
+                field: "txt",
+                choose: function(obj) {
+                    index = layer.load();
+                },
+                data: {
+                    token: layui.context.get('token'),
+                    userid: layui.context.get('userid')
+                },
+                allDone: function(obj) { //当文件全部被提交后，才触发
+                    num = 0;
+                    layer.close(index);
+                    layer.alert("全部导入完毕，成功" + obj.successful + "个，失败" + obj.aborted + "个", {
+                        title: false
+                    });
+                    console.log(obj.total); //得到总文件数
+                    console.log(obj.successful); //请求成功的文件数
+                    console.log(obj.aborted); //请求失败的文件数
+                },
+
+                done: function(res) {
+                    num++;
+                    if (!res || res.status !== 0) {
+                        layui.error(res);
+                        return
+                    }
+                    layer.msg("导入完毕" + num + "个");
+                }
+            });
+
+
+
+        });
+    </script>
+</body>
+
+</html>

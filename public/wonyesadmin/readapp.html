@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title> read </title>
+    <!-- 依 赖 样 式 -->
+    <link rel="stylesheet" href="component/pear/css/pear.css" />
+    <!-- 加 载 样 式 -->
+    <link rel="stylesheet" href="admin/css/loader.css" />
+    <!-- 布 局 样 式 -->
+    <link rel="stylesheet" href="admin/css/admin.css" />
+    <style>
+        .layui-layout-body {
+            text-align: center;
+            max-width:420px;
+            width: 100%;
+            text-align: center;
+            margin: auto;
+        }
+        
+        #iframe {
+                position: absolute;
+    height: 92%;
+    border: 1px solid #ddd;
+    width: 100%;
+    max-width:420px;
+    
+    margin: 0 auto;
+    bottom: 10px;
+    left: 0;
+    right: 0;
+    min-height: 600px;
+        }
+        
+        #tips {
+            font-size: 16px;
+            color: #f00;
+        }
+    </style>
+</head>
+<!-- 结 构 代 码 -->
+
+<body class="layui-layout-body pear-admin">
+    <div id="tips">如果无法滑动，请按F12，切换到移动设备模式</div>
+    <iframe id="iframe" src="/h5" frameborder="0"></iframe>
+</body>
+
+</html>

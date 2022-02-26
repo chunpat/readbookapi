@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <link href="../../component/pear/css/pear.css" rel="stylesheet" />
+    <link href="../../admin/css/other/error.css" rel="stylesheet" />
+    <style>
+        .wrap {
+            padding: 15px
+        }
+        
+        h1 {
+            font-size: 16px;
+            margin: 15px auto;
+        }
+        
+        .layui-layer.layui-layer-iframe {
+            overflow: visible;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <h1 id="book_name"></h1>
+        <a class="layui-btn" href="javascript:;" onclick="openadd(this)">添加一个新章节</a>
+        <table id="table" class="layui-table" lay-even lay-skin="line" lay-filter="table"></table>
+    </div>
+
+    <script type="text/html" id="rowbar">
+        <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="remove">删除</a>
+        <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="view">查看</a>
+    </script>
+
+
+    <div id="allcate" class="layui-hide">
+        <select class="layui-select"></select>
+    </div>
+    <script src="../../component/layui/layui.js"></script>
+    <script src="../../component/pear/pear.js"></script>
+    <script>
+        var layer, tableln, addzjiframe;
+        layui.use(['table', 'admin', 'context', 'form'], function() {
+            var book_id = layui.url().search.book_id;
+            layer = layui.layer;
+            var table = layui.table;
+            var $ = layui.jquery;
+
+            layui.admin.setConfigType("json");
+            layui.admin.setConfigPath("../../config/pear.config.json");
+            var config = layui.admin.readConfig();
+            //第一个实例
+            tableln = table.render({
+                elem: '#table',
+                skin: 'line' //行边框风格
+                    ,
+                even: true,
+                url: config.api.baseurl + 'admin/zjlist' //数据接口
+                    ,
+                page: true //开启分页
+                    ,
+                limit: 1000,
+                limits: [500, 1000, 2000, 5000],
+                where: {
+                    token: layui.context.get('token'),
+                    userid: layui.context.get('userid'),
+                    book_id: book_id
+                },
+                cols: [
+                    [ //表头
+                        {
+                            field: 'id',
+                            title: 'ID',
+                            width: 80,
+                            sort: true
+                        }, {
+                            field: 'name',
+                            title: '章节名',
+                            width: 300,
+                            sort: true
+                        }, {
+                            toolbar: '#rowbar',
+                            width: 150
+                        }
+                    ]
+                ],
+                parseData: function(res) {
+                    if (!res || !res.data) {
+                        return {
+                            "code": res.status, //解析接口状态
+                            "msg": res.msg, //解析提示文本
+                            "count": 0, //解析数据长度
+                            "data": null //解析数据列表
+                        };
+                    }
+                    $("#book_name").text('小说:' + res.data.bookinfo['name']);
+                    return {
+                        "code": res.status, //解析接口状态
+                        "msg": res.msg, //解析提示文本
+                        "count": res.data.count, //解析数据长度
+                        "data": res.data.list //解析数据列表
+                    };
+                }
+            });
+
+
+            //删除 管理全部章节，添加新章节
+            table.on('tool(table)', function(obj) {
+                if (obj.event === 'remove') { //查看
+                    layer.confirm('真的删除此章节么', {
+                        title: false
+                    }, function(index) {
+                        layer.load();
+                        $.post(config.api.baseurl + "admin/removezj", {
+                            token: layui.context.get('token'),
+                            userid: layui.context.get('userid'),
+                            zjid: obj.data.id,
+                            book_id: book_id
+                        }, function(res) {
+                            layer.closeAll();
+                            if (!res || res.status !== 0) {
+                                layui.error(res);
+                                return
+                            }
+                            obj.del();
+                        });
+                        //向服务端发送删除指令
+                    });
+                } else if (obj.event === 'view') {
+                    $.post(config.api.baseurl + "admin/viewzj", {
+                        token: layui.context.get('token'),
+                        userid: layui.context.get('userid'),
+                        zjid: obj.data.id,
+                        book_id: book_id
+                    }, function(res) {
+                        if (!res || res.status !== 0) {
+                            layui.error(res);
+                            return
+                        }
+                        layer.open({
+                            type: 1,
+                            content: '<div style="padding:8px;line-height:1.5">' + res.data.content + '</div>',
+                            title: false,
+                            area: ['800px', '400px']
+                        });
+                    });
+                }
+            });
+        });
+
+        function openadd() {
+            addzjiframe = layer.open({
+                type: 2,
+                content: "./addzj.html?book_id=" + layui.url().search.book_id,
+                title: false,
+                area: ['700px', '500px']
+            })
+        }
+
+        function closeAddzjiframe() {
+            layer.close(addzjiframe)
+        }
+    </script>
+</body>
+
+</html>

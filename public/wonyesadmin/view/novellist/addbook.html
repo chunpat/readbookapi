@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <link href="../../component/pear/css/pear.css" rel="stylesheet" />
+    <link href="../../admin/css/other/error.css" rel="stylesheet" />
+    <style>
+        .wrap {
+            padding: 15px
+        }
+        
+        h1 {
+            margin: 15px auto;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <h1>添加一本新书</h1>
+        <hr class="layui-hr">
+        <form class="layui-form">
+            <div class="layui-form-item">
+                <label class="layui-form-label">书名</label>
+                <div class="layui-input-block">
+                    <input type="text" name="name" required lay-verify="required" placeholder="请输入书名" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">作者</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="author" required lay-verify="required" placeholder="请输入作者" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">选择分类</label>
+                <div class="layui-input-block">
+                    <select name="cid" lay-verify="required">
+                </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">连载状态</label>
+                <div class="layui-input-block">
+                    <select name="status" lay-verify="required">
+                    <option value="0">连载中</option>
+                    <option value="1">已完结</option>
+                </select>
+                </div>
+            </div>
+
+            <div class="layui-form-item layui-form-text">
+                <label class="layui-form-label">
+                    <button type="button" class="layui-btn" id="uploadpic">
+                        <i class="layui-icon">&#xe67c;</i>上传封面图片
+                    </button>
+                </label>
+                <div class="layui-input-block" style="text-align:right">
+                    <img id="pic" alt="" style="width:150px;margin-right:0">
+                </div>
+            </div>
+            <div class="layui-form-item layui-form-text">
+                <label class="layui-form-label">小说简介</label>
+                <div class="layui-input-block">
+                    <textarea name="summary" placeholder="请输入简介内容" class="layui-textarea"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item layui-form-text">
+                <label class="layui-form-label">
+                    <button  type="button" class="layui-btn layui-btn-sm"  id="uploadtxt">
+                        <i class="layui-icon">&#xe67c;</i>上传txt
+                    </button>
+                </label>
+                <div class="layui-input-block">
+                    为保证精确拆分，txt中章节标题单独一行，两头使用【【和 】】符号包住，<br> 比如 1.txt
+
+                    <div class="layui-text layui-font-gray layui-font-12">
+                        <br> 【【第一章标题】】
+                        <br> 第一章正文
+                        <br> 【【第二章标题】】
+                        <br> 第二章正文
+                        <br> 【【第三章标题】】
+                        <br> 第三章正文
+                        <br>
+                    </div>
+                </div>
+
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button class="layui-btn" lay-submit lay-filter="form">立即提交</button>
+                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <script src="../../component/layui/layui.js"></script>
+    <script src="../../component/pear/pear.js"></script>
+    <script>
+        layui.use(['admin', 'context', 'element', 'form', 'upload'], function() {
+            var $ = layui.jquery;
+            var layer = layui.layer;
+            layui.admin.setConfigPath("../../config/pear.config.json");
+            var config = layui.admin.readConfig();
+            var successbookid = 0;
+            var txtfile = null;
+
+            var allcate = layui.context.get('allcate');
+            var html = '';
+            allcate.forEach(function(it) {
+                html += '<option value="' + it.id + '">' + it.name + '</option>';
+            });
+            $("[name='cid']").html(html);
+            layui.form.render();
+            layui.upload.render({
+                elem: '#uploadpic',
+                url: config.api.baseurl + 'admin/uploadpic' //必填项
+                    ,
+                method: '' //可选项。HTTP类型，默认post
+                    ,
+                field: "pic",
+                accept: "image",
+                data: {
+                    token: layui.context.get('token'),
+                    userid: layui.context.get('userid')
+                },
+                done: function(res) {
+                    if (!res || res.status !== 0) {
+                        layui.error(res);
+                        return
+                    }
+                    $("#pic").attr('src', res.data.src);
+                }
+            });
+
+
+
+            layui.form.on('submit(form)', function(data) {
+                console.log(data);
+                var pic = $("#pic").attr('src');
+
+                delete data.field['txt'];
+
+                data.field['userid'] = layui.context.get('userid');
+                data.field['token'] = layui.context.get('token');
+                if (pic && /^http/.test(pic)) {
+                    data.field['pic'] = pic;
+                }
+                var index = layer.load();
+                var formData = new FormData();
+                for (var i in data.field) {
+                    formData.append(i, data.field[i]);
+                }
+                if (txtfile) {
+                    formData.append("txt", $("#uploadtxt+input[type='file']")[0].files[0]);
+                }
+                $.ajax({
+                    url: config.api.baseurl + "admin/addbook",
+                    data: formData,
+                    type: "POST",
+                    processData: false, // 不处理数据
+                    contentType: false,
+                    success: function(res) {
+                        layer.close(index);
+
+                        if (!res || res.status !== 0) {
+                            layui.error(res);
+                            return
+                        }
+                        parent.layui.layer.closeAll();
+                        parent.tableln.reload();
+
+                    }
+                });
+                return false;
+            });
+
+        });
+    </script>
+</body>
+
+</html>

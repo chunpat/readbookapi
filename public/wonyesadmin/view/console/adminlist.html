@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <link href="../../component/pear/css/pear.css" rel="stylesheet" />
+    <link href="../../admin/css/other/error.css" rel="stylesheet" />
+    <style>
+        .wrap {
+            padding: 15px
+        }
+        
+        h1 {
+            font-size: 16px;
+            margin: 15px auto;
+        }
+        
+        .layui-layer.layui-layer-iframe {
+            overflow: visible;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <!-- <a class="layui-btn" href="javascript:;" onclick="openadd(this)">添加一个新章节</a> -->
+        <table id="table" class="layui-table" lay-even lay-skin="line" lay-filter="table"></table>
+    </div>
+
+    <script type="text/html" id="rowbar">
+        <!-- <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="remove">删除</a> -->
+        <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="editpass">修改密码</a>
+    </script>
+
+
+    <div id="allcate" class="layui-hide">
+        <select class="layui-select"></select>
+    </div>
+    <script src="../../component/layui/layui.js"></script>
+    <script src="../../component/pear/pear.js"></script>
+    <script>
+        var config, layer, $, tableln, addzjiframe;
+        layui.use(['table', 'admin', 'context', 'form', 'popup'], function() {
+            var table = layui.table;
+            layer = layui.layer;
+            $ = layui.jquery;
+            layui.admin.setConfigType("json");
+            layui.admin.setConfigPath("../../config/pear.config.json");
+            config = layui.admin.readConfig();
+            //第一个实例
+            tableln = table.render({
+                elem: '#table',
+                skin: 'line' //行边框风格
+                    ,
+                even: true,
+                url: config.api.baseurl + 'admin/adminlist' //数据接口
+                    ,
+                page: true //开启分页
+                    ,
+                limit: 10,
+                limits: [500, 1000, 2000, 5000],
+                where: {
+                    token: layui.context.get('token'),
+                    userid: layui.context.get('userid')
+                },
+                cols: [
+                    [ //表头
+                        {
+                            field: 'id',
+                            title: 'ID',
+                            width: 80,
+                            sort: true
+                        }, {
+                            field: 'name',
+                            title: '登录名',
+                            width: 300,
+                            sort: true
+                        }, {
+                            toolbar: '#rowbar',
+                            width: 150
+                        }
+                    ]
+                ],
+                // toolbar: "#tablebar",
+                parseData: function(res) {
+                    return {
+                        "code": res.status, //解析接口状态
+                        "msg": res.msg, //解析提示文本
+                        "count": 1, //解析数据长度
+                        "data": res.data //解析数据列表
+                    };
+                }
+            });
+
+
+            //删除 管理全部章节，添加新章节
+            table.on('tool(table)', function(obj) {
+                console.log(obj)
+                if (obj.event === 'editpass') { //查看
+                    layer.prompt({
+                        title: "输入新密码"
+                    }, function(value) {
+                        var index = layer.load();
+                        $.post(config.api.baseurl + "admin/editpass", {
+                            token: layui.context.get('token'),
+                            userid: layui.context.get('userid'),
+                            id: obj.data.id,
+                            pass: window.btoa(value)
+                        }, function(res) {
+                            layer.close(index)
+                            if (!res || res.status !== 0) {
+                                layer.alert(res && res.msg ? res.msg : "修改密码出错了", {
+                                    title: false
+                                });
+                                return
+                            }
+                            layui.popup.success('修改成功', function() {
+                                layer.closeAll();
+                            });
+                            // tableln.reload();
+                        });
+
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta http-equiv="X-UA-Compatible" content="ie=edge">
+		<link rel="stylesheet" type="text/css" href="./css/mui.min.css" />
+		<script type="text/javascript" src="./js/uni.webview.1.5.1.js"></script>
+		<style>
+			html,
+			body {
+				background-color: #ffffff;
+			}
+
+			.thumb {
+				height: 75px;
+				border: 1px solid #000;
+				margin: 10px 5px 0 0;
+			}
+
+			#list {
+				padding: 15px;
+				text-align: center;
+			}
+
+			#progress_bar {
+				margin: 10px 0;
+				padding: 3px;
+				border: 1px solid #000;
+				font-size: 14px;
+				clear: both;
+				opacity: 0;
+				-moz-transition: opacity 1s linear;
+				-o-transition: opacity 1s linear;
+				-webkit-transition: opacity 1s linear;
+			}
+
+			#progress_bar.loading {
+				opacity: 1.0;
+			}
+
+			#progress_bar .percent {
+				background-color: #99ccff;
+				height: auto;
+				width: 0;
+			}
+
+			.mui-bar {
+				background: #ffffff;
+				box-shadow: none;
+			}
+
+			.mui-bar .mui-pull-left .mui-icon {
+				padding-right: 5px;
+				font-size: 28px;
+			}
+
+			.mui-bar .mui-btn {
+				font-weight: normal;
+				font-size: 17px;
+			}
+
+			.mui-bar .mui-btn-link {
+				top: 1px;
+			}
+
+
+			#bar {
+				top: 0;
+				height: 80px;
+				background-color: #fff;
+				position: fixed;
+				left: 0;
+				right: 0;
+
+			}
+
+			#header {
+				top: 36px;
+				position: absolute;
+				border-bottom: 1px solid #eee;
+			}
+
+			#mui-content {
+				margin-top: 80px;
+				padding: 10px;
+				background: #fff;
+			}
+
+			.mui-table-view {
+				margin-top: 0;
+			}
+
+			.wrap.mui-card,
+			#list {
+				padding-left: 0 !important;
+			}
+
+			.mui-input-row.mui-checkbox,
+			.mui-input-row.mui-checkbox input {
+				padding-left: 0 !important;
+				margin-left: 0 !important;
+			}
+
+			.mui-input-row.mui-checkbox label {
+				text-align: left;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+
+			#btngroup {
+				text-align: center;
+			}
+
+			#btngroup .mui-btn {
+				width: 100px;
+				height: 35px;
+				line-height: 35px;
+				padding: 0;
+				text-align: center;
+			}
+
+			#error {
+				margin: 10px auto;
+				text-align: center;
+				color: #FF5053;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="bar"></div>
+		<header id="header" class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">导入图书</h1>
+		</header>
+		<div class="mui-content" id="mui-content">
+			<div id="error">正在扫描本地图书，请稍等</div>
+			<div class="wrap mui-card">
+				<div id="list" class="mui-input-group"></div>
+			</div>
+			<div id="btngroup">
+				<button type="button" class="mui-btn" onclick="quanxuan()">全选</button>
+				<button type="button" class="mui-btn mui-btn-primary" onclick="daoru()">导入</button>
+			</div>
+
+
+		</div>
+		<script type="text/javascript" src="./js/mui.min.js"></script>
+		<script type="text/javascript" src="./js/md5.js"></script>
+		<script>
+			let isall = false
+			let shoudimport = hasimported = 0
+			let timeid = null
+
+			function quanxuan() {
+				let all = document.querySelectorAll('#list input')
+				console.log('all.length=' + all.length);
+				for (let i = 0, len = all.length; i < len; i++) {
+					console.log(all[i].getAttribute('type'));
+					console.log('i=' + i);
+					if (isall) {
+						console.log(i + '=' + isall);
+						all[i].checked = false
+					} else {
+						console.log(i + '==' + isall);
+						all[i].checked = true
+					}
+				}
+
+				isall = !isall
+			}
+
+			function daoru() {
+				console.log('开始导入');
+				plus.nativeUI.showWaiting('导入中请稍等')
+				let all = document.querySelectorAll('#list input:checked')
+				let hasids = plus.storage.getItem('localbookstore')
+				if (hasids) {
+					hasids = JSON.parse(hasids)
+				} else {
+					hasids = []
+				}
+				let data = []
+				console.log(JSON.stringify(hasids));
+				shoudimport = all.length
+				hasimported = 0
+
+				for (let i = 0, len = all.length; i < len; i++) {
+					if (all[i].checked) {
+						let bookname = all[i].getAttribute('data-name')
+						let md5name = md5(bookname)
+						console.log(bookname + '=' + md5name);
+						if (hasids.indexOf(md5name) === -1) {
+							hasids.push(md5name)
+							plus.storage.setItem('localbookstore-' + md5name, JSON.stringify({
+								cate: {},
+								start: {},
+								end: {},
+								lastzj: 0,
+								progress: 0,
+								lasttime: parseInt((new Date).getTime() / 1000),
+								cover: "@/static/imgs/book_detail.png",
+								articlename: bookname,
+								author: "本地图书",
+								intro: "本地导入图书",
+								id: md5name
+							}));
+							console.log(all[i].value);
+							handleFileSelect(all[i].value);
+						}
+
+					}
+				}
+				console.log(hasids);
+				plus.storage.setItem('localbookstore', JSON.stringify(hasids))
+				timeid = setInterval(() => {
+					if (hasimported >= shoudimport) {
+						plus.nativeUI.closeWaiting()
+					}
+				}, 1000)
+			}
+			mui.init({
+				swipeBack: true //启用右滑关闭功能
+			});
+
+
+			mui.plusReady(function() {
+				var statusH = plus.navigator.getStatusbarHeight()
+				plus.navigator.setStatusBarStyle('dark')
+				mui('#bar')[0].style.paddingTop = (statusH + 44) + 'px'
+				mui('#header')[0].style.top = statusH + 'px'
+				mui('#mui-content')[0].style.marginTop = (statusH + 44) + 'px'
+				plus.nativeUI.toast('正在扫描本地图书，请稍等...')
+				getLocalListFile()
+			})
+
+
+			// 循环处理每个文件
+			async function handleFileSelect(filepath) {
+				console.log('filepath=' + filepath);
+				await plus.io.resolveLocalFileSystemURL(filepath, function(entry) {
+					// 可通过entry对象操作test.html文件 
+					entry.file(function(file) {
+						var fileReader = new plus.io.FileReader();
+						fileReader.readAsText(file);
+						fileReader.onloadend = function(evt) {
+							splitcontent(evt.target.result, file.name, md5(file.name), filepath)
+						}
+					});
+				}, function(e) {
+					console.log("Resolve file URL failed: " + e.message);
+				});
+			}
+
+			// 切割为章节和内容正文
+			function splitcontent(text, bookname, bookid, fullpath) {
+				// 切割字符
+				const reg = new RegExp(/(第?[一二两三四五六七八九十零百千万亿0-9１２３４５６７８９０]{1,6}[章回卷节篇幕集部][、.\s][^\n]*)[_,-]?/g);
+				let match = '';
+				// 章节信息
+				let catalog = [];
+				let cindex = 0;
+				while ((match = reg.exec(text)) != null) {
+					console.log('subject=' + match[0]);
+					catalog.push({
+						index: cindex,
+						chapter: cindex + 1,
+						name: match[0],
+						chapterid: cindex + 1,
+					})
+					cindex++
+				}
+				console.log(JSON.stringify(catalog));
+
+				// 存储目录和正文信息			
+				if (catalog.length < 1) {
+					if (plus.networkinfo.getCurrentType() == 1) {
+						hasimported++
+						let div = document.createElement('div')
+						div.innerHTML = '[' + bookname + ']导入失败，没有正常的章节断点或不是utf-8编码'
+						document.getElementById('error').appendChild(div)
+						return
+					}
+					// 匹配到的章节数量小于1，可能是gbk编码，本地无法转码，上传到服务器进行
+					// uploadbyconvert()
+					var task = plus.uploader.createUpload("http://bapp.wonyes.org/api/bookparse", {
+							method: "POST",
+							priority: 100
+						},
+						function(d, status) {}
+					);
+					task.addFile(fullpath, {
+						key: "file"
+					});
+					task.addData("string_key", "string_value");
+					// 监听上传任务状态
+					const onStateChanged = (upload, status) => {
+						if (upload.state == 4 && status == 200) {
+							// 上传完成
+							
+							let d = JSON.parse(upload.responseText)
+							if(d.status!==0){
+								plug.nativeUI.toast(d.msg)
+								return false;
+							}
+							console.log(JSON.stringify(d.data.subject));
+							plus.storage.setItem("mulu:" + bookid, JSON.stringify(d.data.subject))
+							d.data.content.forEach((it, i) => {
+								console.log('i=' + i);
+								plus.storage.setItem('zw:' + bookid + ':' + (i+1), it)
+							})
+							hasimported++
+						}
+					}
+					task.addEventListener("statechanged", onStateChanged, false);
+					task.start();
+				} else {
+					plus.storage.setItem("mulu:" + bookid, JSON.stringify(catalog))
+					// 存储正文内容
+
+					let tmp = text.split(reg)
+					// console.log(tmp);
+					let cindex = 0;
+					for (let i = 0, len = tmp.length; i < len; i++) {
+						console.log('i=' + i);
+						// 存入章节缓存，书名key:章节顺序
+						if (tmp[i] == catalog[cindex].name) {
+							i += 1;
+							console.log(i + '=cindex:' + cindex);
+							console.log(catalog[cindex].name);
+							// 是章节
+							plus.storage.setItem('zw:' + bookid + ':' + (cindex + 1), JSON.stringify({
+								articleid: cindex + 1,
+								content: catalog[cindex].name + "\n" + tmp[i].replace(/\n/g, '<br>')
+							}))
+							cindex++
+						}
+					}
+					plus.nativeUI.toast('已成功导入:' + bookname)
+					hasimported++
+				}
+				// plus.nativeUI.closeWaiting()
+			}
+
+
+			function getLocalListFile() {
+				// 读取地址
+				const local = "file:///storage/emulated/0/";
+				const MD_RegExp = /\.txt/;
+				const spot_Reg = /^\./;
+				plus.io.resolveLocalFileSystemURL(local, (directoryEntry) => {
+					console.log(local);
+					// 设置文件路径
+					const fullPath = directoryEntry.fullPath;
+					// 设置文件夹映射表 
+					const directory = {};
+					// 递归获取文件
+					const next = (directoryEntry) => {
+						// 获取文件夹信息
+						let directoryReader = directoryEntry.createReader();
+						// 获取文件列表信息
+						directoryReader.readEntries((entries) => {
+							//  entries[0].isDirectory true 是文件夹  false 是文件
+							// entries[0].isFile true 是文件  false 是文件夹
+							for (let i = 0; i < entries.length; i++) {
+								console.log('i=' + i + ',name=' + entries[i].name);
+								// 是文件夹 并且 不是隐藏文件 并且 文件夹映射列表里没有  则递归判断
+								if (entries[i].isDirectory && !spot_Reg.test(entries[i].name) && !
+									directory[entries[i].name]) {
+									// 读取文件夹信息
+									entries[i].getMetadata((msg) => {
+										// 如果文件夹中有内容则递归执行
+										directory[entries[i].name] = msg;
+										if (msg.directoryCount > 0 || msg.fileCount > 0) {
+											// 递归查找
+											next(entries[i]);
+										}
+									}, (err) => {
+										console.log(err);
+									})
+								} else if (entries[i].isFile && MD_RegExp.test(entries[i].name)) {
+									// 获取文件信息 并插入
+									try {
+										let thefile = entries[i]
+										thefile.getMetadata(function(metadata) {
+											if (metadata.size > 102400) {
+												var html = `
+													<input name="file" type="checkbox" data-name="${thefile.name}" value="${thefile.fullPath}">
+													<label>【` + (metadata.size / 1024 / 1024).toFixed(2) + `MB】:${thefile.name}</label>
+												`
+												let div = document.createElement('div')
+												div.className = 'mui-input-row mui-checkbox mui-left'
+												div.innerHTML = html
+												mui('#list')[0].appendChild(div)
+												mui('#error')[0].innerHTML = ''
+											}
+										}, function() {});
+									} catch (e) {
+										console.log(e);
+									}
+								}
+							}
+						}, err => {
+							console.log(JSON.stringify(err));
+						})
+					}
+					next(directoryEntry)
+				});
+			}
+		</script>
+	</body>

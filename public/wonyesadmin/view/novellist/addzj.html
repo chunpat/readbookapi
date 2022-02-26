@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <link href="../../component/pear/css/pear.css" rel="stylesheet" />
+    <link href="../../admin/css/other/error.css" rel="stylesheet" />
+    <style>
+        .wrap {
+            padding: 15px
+        }
+        
+        h1 {
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <h1 class="">添加新章节</h1>
+        <hr class="layui-hr">
+        <form class="layui-form">
+            <div class="layui-form-item">
+                <label class="layui-form-label">章节名称</label>
+                <div class="layui-input-block">
+                    <input type="text" name="name" required lay-verify="required" placeholder="请输入章节名称" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+
+            <div class="layui-form-item layui-form-text">
+                <label class="layui-form-label">章节正文</label>
+                <div class="layui-input-block">
+                    <textarea style="height:300px" required lay-verify="required" name="content" placeholder="请输入内容" class="layui-textarea"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item layui-form-text">
+                <label class="layui-form-label">
+                    <button  type="button" class="layui-btn layui-btn-sm"  id="uploadtxt">
+                        <i class="layui-icon">&#xe67c;</i>从txt文件中添加
+                    </button>
+                </label>
+                <div class="layui-input-block"></div>
+
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button class="layui-btn" lay-submit lay-filter="form">立即提交</button>
+                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <script src="../../component/layui/layui.js"></script>
+    <script src="../../component/pear/pear.js"></script>
+    <script>
+        layui.use(['admin', 'context', 'element', 'form', 'upload'], function() {
+            var $ = layui.jquery;
+            var layer = layui.layer;
+            layui.admin.setConfigPath("../../config/pear.config.json");
+            var config = layui.admin.readConfig();
+            var book_id = layui.url().search.book_id;
+            layui.upload.render({
+                elem: '#uploadtxt',
+                url: config.api.baseurl + 'admin/uploadpic' //必填项
+                    ,
+                method: '' //可选项。HTTP类型，默认post
+                    ,
+                field: "txt",
+                auto: false,
+                accept: "file",
+                exts: 'txt',
+
+                acceptMime: "text/plain",
+
+                choose: function(obj) {
+                    obj.preview(function(index, file, result) {
+                        console.log(file);
+                        var read = new FileReader(file);
+                        read.onload = function() {
+                            $("[name='content']").val($("[name='content']").val() + this.result);
+                            layui.form.render();
+                        };
+                        read.readAsText(file);
+                    });
+                }
+            });
+
+            layui.form.on('submit(form)', function(data) {
+                data.field['userid'] = layui.context.get('userid');
+                data.field['token'] = layui.context.get('token');
+                data.field['book_id'] = book_id;
+                var index = layer.load();
+                $.post({
+                    url: config.api.baseurl + "admin/addzj",
+                    data: data.field,
+                    type: "POST",
+                    success: function(res) {
+                        layer.close(index);
+                        if (!res || res.status !== 0) {
+                            layui.error(res);
+                            return
+                        }
+                        parent.closeAddzjiframe();
+                        parent.tableln.reload();
+                    }
+                });
+                return false;
+            });
+
+        });
+    </script>
+</body>
+
+</html>

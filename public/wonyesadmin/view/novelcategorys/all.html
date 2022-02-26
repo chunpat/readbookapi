@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <link href="../../component/pear/css/pear.css" rel="stylesheet" />
+    <link href="../../admin/css/other/error.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div class="">
+        <table id="table" class="layui-table" lay-even lay-skin="line" lay-filter="table"></table>
+    </div>
+    <script type="text/html" id="tablebar">
+        <a class="layui-btn" lay-event="add">添加新分类</a>
+    </script>
+    <script type="text/html" id="rowbar">
+        <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="remove">删除</a>
+    </script>
+    <script src="../../component/layui/layui.js"></script>
+    <script src="../../component/pear/pear.js"></script>
+    <script>
+        layui.use(['table', 'admin', 'context'], function() {
+            var table = layui.table;
+            var layer = layui.layer;
+            var $ = layui.jquery;
+            layui.admin.setConfigType("json");
+            layui.admin.setConfigPath("../../config/pear.config.json");
+            var config = layui.admin.readConfig();
+            //第一个实例
+            var tableln = table.render({
+                elem: '#table',
+                skin: 'line' //行边框风格
+                    ,
+                even: true,
+                url: config.api.baseurl + 'admin/catelist' //数据接口
+                    ,
+                where: {
+                    token: layui.context.get('token'),
+                    userid: layui.context.get('userid')
+                },
+                cols: [
+                    [ //表头
+                        {
+                            field: 'id',
+                            title: 'ID',
+                            width: 80,
+                            sort: true,
+                            fixed: 'left'
+                        }, {
+                            field: 'name',
+                            title: '分类名称/单击修改',
+                            edit: true,
+                            width: 250
+                        }, {
+                            field: 'booknums',
+                            title: '共有图书数量',
+                            width: 150,
+                            sort: true
+                        }, {
+                            toolbar: '#rowbar',
+                            width: 150
+                        }
+                    ]
+                ],
+                toolbar: "#tablebar",
+                page: false,
+                limit: 30,
+                parseData: function(res) { //res 即为原始返回的数据
+                    return {
+                        "code": res.status, //解析接口状态
+                        "msg": res.msg, //解析提示文本
+                        "count": res.data.count, //解析数据长度
+                        "data": res.data.list //解析数据列表
+                    };
+                }
+            });
+
+
+            //工具条事件
+            table.on('tool(table)', function(obj) {
+                console.log(obj)
+                if (obj.event === 'remove') { //查看
+                    layer.confirm('真的删除行么', {
+                        title: false
+                    }, function(index) {
+                        layer.load();
+                        $.post(config.api.baseurl + "admin/removecate", {
+                            token: layui.context.get('token'),
+                            userid: layui.context.get('userid'),
+                            cateid: obj.data.id
+                        }, function(res) {
+                            layer.closeAll();
+                            if (!res || res.status !== 0) {
+                                layer.alert(res && res.msg ? res.msg : "删除分类出错", {
+                                    title: false
+                                });
+                                return
+                            }
+                            obj.del();
+                            // tableln.reload();
+                        });
+                        //向服务端发送删除指令
+                    });
+                }
+            });
+            table.on("toolbar(table)", function(obj) {
+                console.log(obj);
+                if (obj.event == 'add') {
+                    layer.prompt({
+                        title: "输入新的分类名字"
+                    }, function(name) {
+                        console.log(name);
+
+                        layer.load();
+                        $.post(config.api.baseurl + "admin/addcate", {
+                            token: layui.context.get('token'),
+                            userid: layui.context.get('userid'),
+                            catename: name
+                        }, function(res) {
+                            layer.closeAll();
+                            if (!res || res.status !== 0) {
+                                layer.alert(res && res.msg ? res.msg : "添加分类出错", {
+                                    title: false
+                                });
+                                return
+                            }
+                            tableln.reload();
+                        });
+                    });
+                }
+            });
+
+            table.on('edit(table)', function(obj) { //注：edit是固定事件名，test是table原始容器的属性 lay-filter="对应的值"
+                console.log(obj.value); //得到修改后的值
+                console.log(obj.field); //当前编辑的字段名
+                console.log(obj.data); //所在行的所有相关数据  
+                if (obj.field == 'name') {
+                    if (!obj.value) {
+                        layer.alert('必须填写新的分类名字', {
+                            title: false
+                        })
+                        return
+                    }
+                    layer.load();
+                    $.post(config.api.baseurl + "admin/editcate", {
+                        token: layui.context.get('token'),
+                        userid: layui.context.get('userid'),
+                        catename: obj.value,
+                        cid: obj.data.id
+                    }, function(res) {
+                        layer.closeAll();
+                        if (!res || res.status !== 0) {
+                            layer.alert(res && res.msg ? res.msg : "修改分类出错", {
+                                title: false
+                            });
+                            return
+                        }
+                        obj.update();
+                        // tableln.reload();
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
