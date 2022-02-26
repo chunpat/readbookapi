@@ -1,9 +1,20 @@
-# 书趣app后端使用方法
+# 书趣app后端 
+
+## 关联app 源码
+
+https://ext.dcloud.net.cn/plugin?id=4424
+
+https://gitee.com/jameson512/novelappofuniapp
+
+
 
 ## 首先安装app 插件
 
 [在uniapp市场安装](https://ext.dcloud.net.cn/plugin?id=4424)
 
+
+
+## 安装使用方法 
 
 1. 创建站点，并将网站根目录指向 public目录
 
