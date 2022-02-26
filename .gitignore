@@ -1,7 +1,4 @@
 /.idea
 /.vscode
-/runtime/cache
-/runtime/log
-/runtime/txt/*
 /public/h5
 *.log
