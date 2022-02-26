@@ -37,4 +37,4 @@ location / {
 
 6. 在hbuildx中发行h5版，并将编译后的h5文件夹上传到 public/h5 下
 
-7. end
+7. 后端访问地址  你的域名/wonyesadmin  默认管理员admin，密码 123456
