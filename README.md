@@ -13,6 +13,11 @@ https://gitee.com/jameson512/novelappofuniapp
 [在uniapp市场安装](https://ext.dcloud.net.cn/plugin?id=4424)
 
 
+![扫码下载演示app](https://vkceyugu.cdn.bspapp.com/VKCEYUGU-03752401-f782-4c80-b46b-b8b69bd129f8/46f3bf59-5faf-4260-8936-2d8b83c7c2df.png)
+
+[点击下载演示apk](https://vkceyugu.cdn.bspapp.com/VKCEYUGU-03752401-f782-4c80-b46b-b8b69bd129f8/71be3564-4c52-4526-b891-cc941a04299e.apk)
+
+
 
 ## 安装使用方法 
 
