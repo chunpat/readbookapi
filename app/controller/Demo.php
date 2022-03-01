@@ -27,7 +27,7 @@ class Demo extends BaseController
     public function categorylist()
     {
         header('Content-Type:application/json;charset=UTF-8');
-        exit('{"status":0,"msg":"ok","data":[{"name":"","count":1},{"name":"修真\r","count":14},{"name":"历史军事\r","count":9},{"name":"女生频道\r","count":14},{"name":"武侠仙侠\r","count":7},{"name":"玄幻\r","count":23},{"name":"玄幻奇幻\r","count":20},{"name":"科幻\r","count":16},{"name":"科幻灵异\r","count":17},{"name":"穿越\r","count":18},{"name":"网游\r","count":15},{"name":"网游竞技\r","count":13},{"name":"都市\r","count":15},{"name":"都市言情\r","count":8}]}');
+        exit('{"status":0,"msg":"ok","data":[{"cid":1,"count":9,"name":"玄幻"},{"cid":2,"count":21,"name":"修真"},{"cid":3,"count":19,"name":"仙侠"},{"cid":4,"count":15,"name":"都市"},{"cid":5,"count":11,"name":"网游"},{"cid":6,"count":19,"name":"科幻"},{"cid":7,"count":18,"name":"恐怖"},{"cid":8,"count":19,"name":"历史"},{"cid":9,"count":9,"name":"女生"},{"cid":10,"count":28,"name":"男生"}]}');
     }
     
     // 获取最新图书
@@ -56,6 +56,11 @@ class Demo extends BaseController
     public function getbooklistbystatus($status=0, $page=1, $size=20)
     {
         $this->getbooklistbytime();
+    }
+     // 更新阅读量
+    public function updateviews(){
+        
+        return '';
     }
     
     // 搜索 完结状态获取图书列表

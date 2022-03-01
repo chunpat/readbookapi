@@ -83,6 +83,18 @@ INSERT INTO `bapp_banners` (`id`, `pic`, `create_time`, `update_time`, `url`) VA
 
 -- --------------------------------------------------------
 
+CREATE TABLE IF NOT EXISTS `bapp_members` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` char(64) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `groupid` tinyint(2) NOT NULL DEFAULT '1' COMMENT '群组等级',
+  `balance` int(11) NOT NULL DEFAULT '0' COMMENT '余额',
+  `avatar` varchar(255) NOT NULL DEFAULT '' COMMENT '头像图',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='app会员表';
+
 --
 -- 表的结构 `bapp_books`
 --

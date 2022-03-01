@@ -40,9 +40,8 @@ function okjson($data=[],$status=0,$msg='ok'){
     );
 }
 
-//生成token
-function createJwt($userid)
-    {
+//后端admin登录 生成token
+function createJwt($userid){
         $key = md5('adsga#@!'); //jwt的签发密钥，验证token的时候需要用到
         $time = time(); //签发时间
         $expire = $time + 86400; //过期时间
@@ -57,11 +56,26 @@ function createJwt($userid)
         $jwt = \Firebase\JWT\JWT::encode($token, $key,'HS256');
         return $jwt;
     }
+// app登录
+function createJwtMember($userid){
+        $key = md5('234aef1$ae#@!'); //jwt的签发密钥，验证token的时候需要用到
+        $time = time(); //签发时间
+        $expire = $time + 86400; //过期时间
+        $token = array(
+            "userid" => $userid,
+            "iss" => "http://bapp.wonyes.org",//签发组织
+            "aud" => "admin", //签发作者
+            "iat" => $time,
+            "nbf" => $time,
+            "exp" => $expire
+        );
+        $jwt = \Firebase\JWT\JWT::encode($token, $key,'HS256');
+        return $jwt;
+    }
 
-    //校验jwt权限API
-    function verifyJwt($jwt = '')
-    {
-        $key = md5('adsga#@!');
+//校验jwt权限API
+function verifyJwtMember($jwt = ''){
+        $key = md5('234aef1$ae#@!');
         try {
             $jwtAuth = json_encode(\Firebase\JWT\JWT::decode($jwt, new \Firebase\JWT\Key($key, 'HS256')));
             $authInfo = json_decode($jwtAuth, true);
