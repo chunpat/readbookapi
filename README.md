@@ -14,8 +14,7 @@ https://gitee.com/jameson512/novelappofuniapp
 
 
 
-
-## 安装使用方法 
+## 安装使用方法(linux+nginx)
 
 1. 创建站点，并将网站根目录指向 public目录
 
