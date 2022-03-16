@@ -47,7 +47,7 @@ TRUNCATE TABLE `bapp_admin`;
 --
 
 INSERT INTO `bapp_admin` (`id`, `name`, `pass`, `create_time`, `update_time`) VALUES
-(1, 'admin', '54250eb6b31fb28d344ae9adea617da445a35699', '2022-02-21 23:12:15', '2022-02-21 23:12:15');
+(1, 'admin', 'b89fb0638b62af9e79c8412245bdac4d8ca654ce', '2022-02-21 23:12:15', '2022-02-21 23:12:15');
 
 -- --------------------------------------------------------
 
