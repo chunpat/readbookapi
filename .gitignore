@@ -3,3 +3,5 @@
 /public/h5
 *.log
 runtime/*
+.env
+.DS_Store

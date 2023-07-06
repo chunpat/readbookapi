@@ -10,7 +10,6 @@ use think\facade\Cache;
 
 class Api extends BaseController
 {
-    
     // 获取 banner
     public function getbanner(){
         $data=Db::name('banners')->select()->toArray();
