@@ -5,8 +5,11 @@ app接口文件
 namespace app\controller;
 
 use app\BaseController;
+use app\model\Books;
 use think\facade\Db;
 use think\facade\Cache;
+use think\Request;
+use think\Response;
 
 class Api extends BaseController
 {
@@ -21,13 +24,12 @@ class Api extends BaseController
     */
     public function categorylistold()
     {
-        try {
-            $data=Db::name('books')->group("c_name")->field("c_name as name,count(id) as count")->select()->toArray();
-        } catch (\Exception $e) {
-            return responsedata(1, '获取分类数据出错了');
-        }
-        
-        return responsedata($data, 0, "ok");
+        $data = (new Books())->field("c_name as name,count(id) as count")
+            ->group("c_name")
+            ->select()
+            ->toArray();
+//        $data=Db::name('books')->group("c_name")->field("c_name as name,count(id) as count")->select()->toArray();
+        return responsedata($data);
     }
     public function categorylist()
     {
@@ -41,7 +43,7 @@ class Api extends BaseController
             return responsedata(1, '获取分类数据出错了');
         }
         
-        return responsedata($data, 0, "ok");
+        return responsedata($data);
     }
     // 获取分类数据，或者根据cid获取分类名字
     private function getallcates($cid=0){
@@ -54,33 +56,23 @@ class Api extends BaseController
     
     // 获取最新图书
     public function getbooklistbytime($page=1,$size=20){
-        try {
-            $data=Db::name('books')->order('update_time desc')->limit(($page-1)*$size, $size)->select()->toArray();
-            foreach ($data as $k=>$v){
-                $data[$k]['c_name']=$this->getallcates($v['cid']);
-            }
-        } catch (\Exception $e) {
-            return responsedata(1, '获取图书数据出错了');
+        $data=Db::name('books')->order('update_time desc')->limit(($page-1)*$size, $size)->select()->toArray();
+        foreach ($data as $k=>$v){
+            $data[$k]['c_name']=$this->getallcates($v['cid']);
         }
-        
-        return responsedata($data, 0, "ok");
+        return responsedata($data);
     }
     // 获取排行
     public function getbooklistbyrank($type='create_time',$page=1,$size=20){
-        try {
-            if($type=='status'){
-                $data=Db::name('books')->where('status', $type)->order('views desc')->limit(($page-1)*$size, $size)->select()->toArray();
-            }else{
-                $data=Db::name('books')->order($type.' desc')->limit(($page-1)*$size, $size)->select()->toArray();
-            }
-            foreach ($data as $k=>$v){
-                $data[$k]['c_name']=$this->getallcates($v['cid']);
-            }
-        } catch (\Exception $e) {
-            return responsedata(1, '获取图书数据出错了');
+        if($type=='status'){
+            $data=Db::name('books')->where('status', $type)->order('views desc')->limit(($page-1)*$size, $size)->select()->toArray();
+        }else{
+            $data=Db::name('books')->order($type.' desc')->limit(($page-1)*$size, $size)->select()->toArray();
         }
-        
-        return responsedata($data, 0, "ok");
+        foreach ($data as $k=>$v){
+            $data[$k]['c_name']=$this->getallcates($v['cid']);
+        }
+        return responsedata($data);
     }
     
     // 根据分类名字获取图书列表
@@ -105,7 +97,7 @@ class Api extends BaseController
             return responsedata(1, '获取图书数据出错了');
         }
         
-        return responsedata($data, 0, "ok");
+        return responsedata($data);
     }
     // 根据分类id
     public function getbooklistbycid($cid=0, $page=1, $size=20)
@@ -120,7 +112,7 @@ class Api extends BaseController
             return responsedata(1, '获取图书数据出错了'.$e->getMessage());
         }
         
-        return responsedata($data, 0, "ok");
+        return responsedata($data);
     }
     
     // 获取阅读量倒序的图书列表
@@ -135,7 +127,7 @@ class Api extends BaseController
             return responsedata(1, '获取图书数据出错了');
         }
         
-        return responsedata($data, 0, "ok");
+        return responsedata($data);
     }
     // 更新阅读量
     public function updateviews(){
@@ -158,7 +150,7 @@ class Api extends BaseController
             return responsedata(1, '获取图书数据出错了');
         }
         
-        return responsedata($data, 0, "ok");
+        return responsedata($data);
     }
     
     // 搜索 完结状态获取图书列表
@@ -176,7 +168,7 @@ class Api extends BaseController
             return responsedata(1, '获取图书数据出错了');
         }
         
-        return responsedata(['books'=>$data,'count'=>count($data)], 0, "ok");
+        return responsedata(['books'=>$data,'count'=>count($data)]);
     }
     // 根据id， 获取单本图书的信息
     public function getbookinfo($book_id=0)
@@ -196,13 +188,15 @@ class Api extends BaseController
             return responsedata(1, '获取图书数据出错了'.$e->getMessage());
         }
         
-        return responsedata($data, 0, "ok");
+        return responsedata($data);
     }
     
     // 根据 book_id 和 article_id 获取章节正文数据
-    public function getcontent($book_id=0, $index=1)
+    public function getcontent(Request $request)
     {
-        $txt=app()->getRootPath()."runtime/txt/{$book_id}/{$index}.txt";
+        $bookId = $request->post('book_id');
+        $index = $request->post('index');
+        $txt=app()->getRootPath()."runtime/txt/{$bookId}/{$index}.txt";
         if (!is_file($txt)) {
             return responsedata(202, "不存在该章节");
         }
