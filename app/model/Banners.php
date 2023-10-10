@@ -4,6 +4,6 @@ namespace app\model;
 
 use think\Model;
 
-class Books extends Model
+class Banners extends Model
 {
 }
