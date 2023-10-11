@@ -63,6 +63,6 @@
     },
     "header": {},
     "api": {
-        "baseurl": "http://bappdemo.wonyes.org/"
+        "baseurl": "http://127.0.0.1:8096/"
     }
 }

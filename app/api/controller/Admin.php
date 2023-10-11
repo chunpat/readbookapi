@@ -3,7 +3,7 @@
  * 后台管理各接口，需要验证token
  */
 
-namespace app\controller;
+namespace app\controller1;
 
 use app\BaseController;
 use think\facade\Db;

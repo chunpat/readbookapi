@@ -757,9 +757,11 @@ class Route
         if ($withRoute) {
             //加载路由
             if ($withRoute instanceof Closure) {
+
                 $withRoute();
             }
             $dispatch = $this->check();
+
         } else {
             $dispatch = $this->url($this->path());
         }
