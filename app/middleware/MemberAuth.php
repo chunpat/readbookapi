@@ -2,8 +2,7 @@
 
 namespace app\middleware;
 
-
-class Memberauth
+class MemberAuth
 {
     public function handle($request, \Closure $next)
     {
