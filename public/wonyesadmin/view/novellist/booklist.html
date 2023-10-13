@@ -74,7 +74,7 @@
                 skin: 'line' //行边框风格
                     ,
                 even: true,
-                url: config.api.baseurl + 'admin/booklist' //数据接口
+                url: config.api.baseurl + 'admin/admin/bookList' //数据接口
                     ,
                 page: true //开启分页
                     ,
@@ -142,7 +142,7 @@
                     console.log("相等无需修改");
                     return
                 }
-                layui.jquery.post(config.api.baseurl + "admin/editbook", {
+                layui.jquery.post(config.api.baseurl + "admin/admin/editBook", {
                     token: layui.context.get('token'),
                     userid: layui.context.get('userid'),
                     field: "status",
@@ -166,7 +166,7 @@
                     console.log("相等无需修改");
                     return
                 }
-                layui.jquery.post(config.api.baseurl + "admin/editbook", {
+                layui.jquery.post(config.api.baseurl + "admin/admin/editBook", {
                     token: layui.context.get('token'),
                     userid: layui.context.get('userid'),
                     field: "cid",
@@ -189,7 +189,7 @@
                         title: false
                     }, function(index) {
                         layer.load();
-                        $.post(config.api.baseurl + "admin/removebook", {
+                        $.post(config.api.baseurl + "admin/admin/removeBook", {
                             token: layui.context.get('token'),
                             userid: layui.context.get('userid'),
                             book_id: obj.data.id
@@ -221,7 +221,7 @@
                         return
                     }
                     layer.load();
-                    $.post(config.api.baseurl + "admin/editbook", {
+                    $.post(config.api.baseurl + "admin/admin/editBook", {
                         token: layui.context.get('token'),
                         userid: layui.context.get('userid'),
                         field: 'name',

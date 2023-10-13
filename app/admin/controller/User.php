@@ -3,7 +3,7 @@
  * 后台管理员登录
  */
 
-namespace app\controller1;
+namespace app\admin\controller;
 
 use app\BaseController;
 use think\facade\Db;

@@ -65,7 +65,7 @@
             var indexload;
             layui.upload.render({
                 elem: '#uploadpic',
-                url: config.api.baseurl + 'admin/uploadpic' //必填项
+                url: config.api.baseurl + 'admin/admin/uploadPic' //必填项
                     ,
                 method: '' //可选项。HTTP类型，默认post
                     ,
@@ -107,7 +107,7 @@
                 }
                 var index = layer.load();
 
-                $.post(config.api.baseurl + "admin/addbanner",
+                $.post(config.api.baseurl + "admin/admin/addbanner",
                     data.field,
                     function(res) {
                         layer.close(index);

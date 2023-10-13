@@ -52,7 +52,7 @@
             // 登 录 提 交
             layui.form.on('submit(login)', function(data) {
                 data.field['password'] = window.btoa(data.field['password'])
-                $.post(config.api.baseurl + "user/login", data.field, function(res, err, s) {
+                $.post(config.api.baseurl + "/admin/user/login", data.field, function(res, err, s) {
                     if (res && res.status === 0) {
                         layui.layer.msg("登录成功");
                         cache.put('token', res.data.token).put('userid', res.data.userid);

@@ -54,7 +54,7 @@
                 skin: 'line' //行边框风格
                     ,
                 even: true,
-                url: config.api.baseurl + 'admin/adminlist' //数据接口
+                url: config.api.baseurl + 'admin/admin/adminlist' //数据接口
                     ,
                 page: true //开启分页
                     ,
@@ -102,7 +102,7 @@
                         title: "输入新密码"
                     }, function(value) {
                         var index = layer.load();
-                        $.post(config.api.baseurl + "admin/editpass", {
+                        $.post(config.api.baseurl + "admin/admin/editpass", {
                             token: layui.context.get('token'),
                             userid: layui.context.get('userid'),
                             id: obj.data.id,

@@ -117,7 +117,7 @@
             layui.form.render();
             layui.upload.render({
                 elem: '#uploadpic',
-                url: config.api.baseurl + 'admin/uploadpic' //必填项
+                url: config.api.baseurl + 'admin/admin/uploadPic' //必填项
                     ,
                 method: '' //可选项。HTTP类型，默认post
                     ,
@@ -158,7 +158,7 @@
                     formData.append("txt", $("#uploadtxt+input[type='file']")[0].files[0]);
                 }
                 $.ajax({
-                    url: config.api.baseurl + "admin/addbook",
+                    url: config.api.baseurl + "admin/admin/addBook",
                     data: formData,
                     type: "POST",
                     processData: false, // 不处理数据

@@ -3,7 +3,7 @@
  * 后台管理各接口，需要验证token
  */
 
-namespace app\controller1;
+namespace app\admin\controller;
 
 use app\BaseController;
 use think\facade\Db;
@@ -17,7 +17,7 @@ class Admin extends BaseController
     ];
 
     // 分类列表
-    public function catelist()
+    public function cateList()
     {
         $data = Db::name('categorys')->column('*', 'id');
 
@@ -36,7 +36,7 @@ class Admin extends BaseController
     }
 
     // 添加新分类
-    public function addcate()
+    public function addCate()
     {
         $data = $this->request->param();
         try {
@@ -54,8 +54,6 @@ class Admin extends BaseController
                 "token" => $this->request->token
             ]);
         } catch (ValidateException $e) {
-            // 验证失败 输出错误信息
-            // exit($e->getMessage());
             return errorjson(202, $e->getMessage());
         }
     }
@@ -147,7 +145,7 @@ class Admin extends BaseController
     }
 
     // 上传封面
-    public function uploadpic()
+    public function uploadPic()
     {
         $file = request()->file('pic');
         if (!in_array($file->extension(), ['jpg', 'jpeg', 'png', 'gif'])) {
@@ -159,7 +157,7 @@ class Admin extends BaseController
     }
 
     // 删除小说
-    public function removebook()
+    public function removeBook()
     {
         $data = $this->request->param();
         if (empty($data['book_id'])) {
@@ -453,7 +451,7 @@ class Admin extends BaseController
     }
 
     // 删除
-    public function removebanner()
+    public function removeBanner()
     {
         $data = $this->request->param();
         if (empty($data['id'])) {
@@ -465,7 +463,7 @@ class Admin extends BaseController
 
 
     // 导入整本
-    public function importtxt()
+    public function importTxt()
     {
         set_time_limit(0);
         try {

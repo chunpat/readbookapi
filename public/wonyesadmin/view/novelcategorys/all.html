@@ -86,7 +86,7 @@
                         title: false
                     }, function(index) {
                         layer.load();
-                        $.post(config.api.baseurl + "admin/removecate", {
+                        $.post(config.api.baseurl + "admin/admin/removeCate", {
                             token: layui.context.get('token'),
                             userid: layui.context.get('userid'),
                             cateid: obj.data.id
@@ -114,7 +114,7 @@
                         console.log(name);
 
                         layer.load();
-                        $.post(config.api.baseurl + "admin/addcate", {
+                        $.post(config.api.baseurl + "admin/admin/addCate", {
                             token: layui.context.get('token'),
                             userid: layui.context.get('userid'),
                             catename: name
@@ -144,7 +144,7 @@
                         return
                     }
                     layer.load();
-                    $.post(config.api.baseurl + "admin/editcate", {
+                    $.post(config.api.baseurl + "admin/admin/editCate", {
                         token: layui.context.get('token'),
                         userid: layui.context.get('userid'),
                         catename: obj.value,

@@ -60,7 +60,7 @@
                 skin: 'line' //行边框风格
                     ,
                 even: true,
-                url: config.api.baseurl + 'admin/bannerlist' //数据接口
+                url: config.api.baseurl + 'admin/admin/bannerList' //数据接口
                     ,
                 page: false,
                 where: {
@@ -124,7 +124,7 @@
                         return
                     }
                     layer.load();
-                    $.post(config.api.baseurl + "admin/editbanner", {
+                    $.post(config.api.baseurl + "admin/admin/editBanner", {
                         token: layui.context.get('token'),
                         userid: layui.context.get('userid'),
                         id: obj.data.id,
@@ -149,7 +149,7 @@
                         title: false
                     }, function(index) {
                         layer.load();
-                        $.post(config.api.baseurl + "admin/removebanner", {
+                        $.post(config.api.baseurl + "admin/admin/removeBanner", {
                             token: layui.context.get('token'),
                             userid: layui.context.get('userid'),
                             id: obj.data.id

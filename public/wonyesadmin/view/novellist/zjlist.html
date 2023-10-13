@@ -57,7 +57,7 @@
                 skin: 'line' //行边框风格
                     ,
                 even: true,
-                url: config.api.baseurl + 'admin/zjlist' //数据接口
+                url: config.api.baseurl + 'admin/admin/zjlist' //数据接口
                     ,
                 page: true //开启分页
                     ,
@@ -113,7 +113,7 @@
                         title: false
                     }, function(index) {
                         layer.load();
-                        $.post(config.api.baseurl + "admin/removezj", {
+                        $.post(config.api.baseurl + "admin/admin/removezj", {
                             token: layui.context.get('token'),
                             userid: layui.context.get('userid'),
                             zjid: obj.data.id,
@@ -129,7 +129,7 @@
                         //向服务端发送删除指令
                     });
                 } else if (obj.event === 'view') {
-                    $.post(config.api.baseurl + "admin/viewzj", {
+                    $.post(config.api.baseurl + "admin/admin/viewzj", {
                         token: layui.context.get('token'),
                         userid: layui.context.get('userid'),
                         zjid: obj.data.id,

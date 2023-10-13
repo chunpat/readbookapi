@@ -93,9 +93,6 @@
     <script src="component/pear/pear.js"></script>
     <!-- 框 架 初 始 化 -->
     <script>
-        console.log(layui.layer);
-        console.log(layui.jquery);
-        console.log(layui.table);
         layui.use(['admin', 'context', 'popup'], function() {
             var layer = layui.layer;
             layui.admin.setConfigType("json");
@@ -115,7 +112,7 @@
             });
 
 
-            // 登出逻辑 
+            // 登出逻辑
             layui.admin.logout(function() {
                 layui.context.remove('token').remove('userid');
                 layui.popup.success("注销成功", function() {
@@ -124,17 +121,13 @@
                 return true;
             })
 
-
-
             // admin.message(function(id, title, context, form) {});
             function islogin(callback) {
-
                 // 连接后台验证登录状态
-                layui.$.post(config.api.baseurl + "user/check", {
+                layui.$.post(config.api.baseurl + "/admin/user/check", {
                     "token": layui.context.get('token'),
                     "userid": layui.context.get('userid')
                 }, function(res) {
-                    console.log('res', res)
                     if (res && res.status === 0) {
                         callback();
                     } else {
